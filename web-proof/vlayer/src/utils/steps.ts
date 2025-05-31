@@ -31,9 +31,9 @@ export const steps: Step[] = [
     path: "",
     kind: STEP_KIND.WELCOME,
     component: WelcomeScreen,
-    title: "X NFT",
+    title: "TrustBuddy Verification",
     description:
-      "Mint an NFT with your X account. Only owner of account can mint NFT for specific handle. This example demonstrates use of Web Proofs.",
+      "Verify your Twitter handle ownership for TrustBuddy. This will create a cryptographic proof that you own the account, which can be used to build trust in the TrustBuddy platform.",
     headerIcon: "/nft-illustration.svg",
     index: 0,
   },
@@ -42,9 +42,9 @@ export const steps: Step[] = [
     kind: STEP_KIND.CONNECT_WALLET,
     backUrl: "",
     component: ConnectWalletStep,
-    title: "X NFT",
+    title: "Connect Wallet",
     description:
-      "To proceed to the next step, please connect your wallet now by clicking the button below.",
+      "Connect your wallet to proceed with the Twitter handle verification process.",
     index: 1,
   },
   {
@@ -52,9 +52,9 @@ export const steps: Step[] = [
     kind: STEP_KIND.START_PROVING,
     backUrl: "/connect-wallet",
     component: ProveStep,
-    title: "X NFT",
+    title: "Generate Proof",
     description:
-      "Open vlayer browser extension and follow instructions in order to produce the Proof of X account ownership. \n",
+      "Open vlayer browser extension and follow instructions to generate a proof of your Twitter account ownership.",
     index: 2,
   },
   {
@@ -62,8 +62,8 @@ export const steps: Step[] = [
     kind: STEP_KIND.INSTALL_EXTENSION,
     component: InstallExtension,
     backUrl: "/connect-wallet",
-    title: "X NFT",
-    description: `Install vlayer browser extension to proceed to the next step. \n`,
+    title: "Install Extension",
+    description: `Install the vlayer browser extension to generate your Twitter handle verification proof.`,
     index: 2,
   },
   {
@@ -79,8 +79,8 @@ export const steps: Step[] = [
     path: "success",
     kind: STEP_KIND.SUCCESS,
     component: SuccessStep,
-    title: "Success",
-    description: "",
+    title: "Verification Complete",
+    description: "Your Twitter handle has been successfully verified. You can now use this verification in TrustBuddy.",
     headerIcon: "/success-illustration.svg",
     index: 4,
   },
