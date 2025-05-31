@@ -20,6 +20,16 @@ const Profile = () => {
     },
   });
 
+  const { data: twitterHandle } = useReadContract({
+    address: deployedContractData?.address as `0x${string}`,
+    abi: deployedContractData?.abi,
+    functionName: "platformUsernames",
+    args: [connectedAddress, 1], // 1 is the Twitter platform enum value
+    query: {
+      enabled: !!connectedAddress && !!deployedContractData?.address,
+    },
+  }) as { data: string | undefined };
+
   const balance = tokenBalance ? Number(tokenBalance) / 1e18 : 0;
   const currentTier = getTier(balance);
 
@@ -35,6 +45,24 @@ const Profile = () => {
             <div className="text-sm font-medium text-base-content/70 mb-2">Connected Address</div>
             <Address address={connectedAddress} />
           </div>
+
+          {/* Verified Twitter Handle */}
+          {twitterHandle && (
+            <div className="mb-6">
+              <div className="text-sm font-medium text-base-content/70 mb-2">Verified Twitter Handle</div>
+              <div className="flex items-center gap-3 p-4 bg-base-200 rounded-xl">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg"
+                  alt="Twitter"
+                  className="w-8 h-8"
+                />
+                <div>
+                  <div className="font-medium">@{twitterHandle}</div>
+                  <div className="text-sm text-base-content/70">Verified</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Token Balance and Current Tier */}
           <div className="mb-8">
