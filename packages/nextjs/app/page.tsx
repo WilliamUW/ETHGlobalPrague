@@ -20,6 +20,7 @@ const Home = () => {
   const [description, setDescription] = useState("");
   const [isSubmitExpanded, setIsSubmitExpanded] = useState(false);
   const [linkInput, setLinkInput] = useState("");
+  const [reportingReview, setReportingReview] = useState<number | null>(null);
 
   const { data: deployedContractData } = useDeployedContractInfo("YourContract");
 
@@ -97,6 +98,29 @@ const Home = () => {
     } catch (error) {
       console.error("Invalid URL:", error);
     }
+  };
+
+  const handleReport = (reviewIndex: number) => {
+    setReportingReview(reviewIndex);
+    // TODO: Implement report functionality
+    setTimeout(() => setReportingReview(null), 2000);
+  };
+
+  const averageRating =
+    reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0;
+
+  const renderStars = (rating: number, size: "sm" | "md" = "md") => {
+    const stars = [];
+    const sizeClass = size === "sm" ? "text-sm" : "text-lg";
+
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <span key={i} className={`${i <= rating ? "text-yellow-500" : "text-gray-300"} ${sizeClass}`}>
+          ★
+        </span>,
+      );
+    }
+    return <div className="flex gap-0.5">{stars}</div>;
   };
 
   return (
@@ -198,33 +222,54 @@ const Home = () => {
 
         {/* View Reviews Section */}
         <div className="bg-base-100 p-8 rounded-3xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-6">Reviews</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Reviews</h2>
+            {reviews.length > 0 && (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  {renderStars(Math.round(averageRating))}
+                  <span className="text-lg font-medium">({averageRating.toFixed(1)})</span>
+                </div>
+                <div className="text-base-content/70">
+                  {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Reviews Display */}
           <div className="space-y-4">
             {reviews && reviews.length > 0 ? (
               reviews.map((review, index) => (
-                <div key={index} className="bg-base-200 p-4 rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <div className="font-medium">
-                        <span>Reviewer: </span>
+                <div key={index} className="bg-base-200 p-6 rounded-xl hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="space-y-1">
+                      <div className="font-medium flex items-center gap-2">
                         <Address address={review.reviewer} />
+                        {review.reviewer === connectedAddress && (
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
+                        )}
                       </div>
                       <div className="text-sm text-base-content/70">
                         {new Date(Number(review.timestamp) * 1000).toLocaleString()}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-bold">{review.rating}</span>
-                      <span className="text-yellow-500">★</span>
+                    <div className="flex items-center gap-3">
+                      {renderStars(review.rating, "sm")}
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => handleReport(index)}
+                        disabled={reportingReview === index}
+                      >
+                        {reportingReview === index ? "Reported" : "Report"}
+                      </button>
                     </div>
                   </div>
-                  <div className="text-base-content/90">{review.description}</div>
+                  <div className="text-base-content/90 leading-relaxed">{review.description}</div>
                 </div>
               ))
             ) : (
-              <div className="text-center text-base-content/70">
+              <div className="text-center text-base-content/70 py-8">
                 {username ? "No reviews found" : "Enter a username to view reviews"}
               </div>
             )}
