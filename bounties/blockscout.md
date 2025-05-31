@@ -11,7 +11,8 @@ Please add a sentence or two on why you're applicable for this prize.
 2. Whenever a smart contract interaction (submitting reviews or verified usernames) occurs, TrustBuddy provides a direct Blockscout scan link so users can verify their transactions on Flare.
 
 Link to the line of code where the tech is used.
-
+https://github.com/WilliamUW/ETHGlobalPrague/blob/28ed505c3806afe2151f478785c1faebc839a65a/packages/nextjs/app/page.tsx#L419C16-L429C25
 
 How easy is it to use the API / Protocol? (1 - very difficult, 10 - very easy)
 10
+Very easy and straight-forward to use!
