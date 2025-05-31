@@ -207,25 +207,26 @@ const Home = () => {
                 <div key={index} className="bg-base-200 p-4 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <p className="font-medium">
-                        Reviewer: <Address address={review.reviewer} />
-                      </p>
-                      <p className="text-sm text-base-content/70">
+                      <div className="font-medium">
+                        <span>Reviewer: </span>
+                        <Address address={review.reviewer} />
+                      </div>
+                      <div className="text-sm text-base-content/70">
                         {new Date(Number(review.timestamp) * 1000).toLocaleString()}
-                      </p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="font-bold">{review.rating}</span>
                       <span className="text-yellow-500">★</span>
                     </div>
                   </div>
-                  <p className="text-base-content/90">{review.description}</p>
+                  <div className="text-base-content/90">{review.description}</div>
                 </div>
               ))
             ) : (
-              <p className="text-center text-base-content/70">
+              <div className="text-center text-base-content/70">
                 {username ? "No reviews found" : "Enter a username to view reviews"}
-              </p>
+              </div>
             )}
           </div>
         </div>
@@ -234,13 +235,13 @@ const Home = () => {
         <div className="mt-8 pt-8 border-t">
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium mb-2">Connected Address:</p>
+              <div className="text-sm font-medium mb-2">Connected Address:</div>
               <Address address={connectedAddress} />
             </div>
             {tokenBalance !== undefined && (
               <div>
-                <p className="text-sm font-medium mb-2">Token Balance:</p>
-                <p className="text-lg font-bold">{Number(tokenBalance) / 1e18} TBT</p>
+                <div className="text-sm font-medium mb-2">Token Balance:</div>
+                <div className="text-lg font-bold">{Number(tokenBalance) / 1e18} TBT</div>
               </div>
             )}
           </div>
