@@ -139,8 +139,11 @@ contract YourContract {
         reviews[_platform][_username].push(newReview);
         emit ReviewSubmitted(_platform, _username, msg.sender, _rating, _description);
 
-        // Mint 1 TBT to reviewer
-        _mint(msg.sender, 1 * 10 ** uint256(decimals));
+        // Mint random (1-5) TBT to reviewer using secure random number
+        (uint256 randomNumber, bool isSecure, ) = randomV2.getRandomNumber();
+        require(isSecure, "Random number is not secure");
+        uint256 mintAmount = (randomNumber % 5) + 1;
+        _mint(msg.sender, mintAmount * 10 ** uint256(decimals));
     }
 
     function getReviewCount(Platform _platform, string calldata _username) external view returns (uint256) {
