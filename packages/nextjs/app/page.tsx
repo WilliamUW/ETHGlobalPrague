@@ -16,8 +16,8 @@ const TIER_THRESHOLDS = {
   BRONZE: 0,
   SILVER: 1,
   GOLD: 5,
-  PLATINUM: 10,
-  DIAMOND: 20,
+  DIAMOND: 10,
+  PLATINUM: 20,
 };
 
 const TIER_COLORS = {
@@ -32,8 +32,8 @@ const TIER_ICONS = {
   BRONZE: "🥉",
   SILVER: "🥈",
   GOLD: "🥇",
-  PLATINUM: "💎",
-  DIAMOND: "👑",
+  PLATINUM: "👑",
+  DIAMOND: "💎",
 };
 
 const getTier = (balance: number) => {
@@ -142,16 +142,6 @@ const Home = () => {
     },
   }) as { data: Review[] | undefined };
 
-  const { data: tokenBalance } = useReadContract({
-    address: deployedContractData?.address as `0x${string}`,
-    abi: deployedContractData?.abi,
-    functionName: "balanceOf",
-    args: [connectedAddress],
-    query: {
-      enabled: !!connectedAddress && !!deployedContractData?.address,
-    },
-  });
-
   const { isLoading: isSubmitting } = useWaitForTransactionReceipt({
     hash,
   });
@@ -234,22 +224,6 @@ const Home = () => {
   return (
     <div className="flex items-center flex-col grow pt-10">
       <div className="px-5 w-full max-w-2xl">
-        {/* Connected Address and Token Balance Display */}
-        <div className="bg-base-100 p-6 rounded-3xl shadow-lg mb-8">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-base-content/70">Connected Address</div>
-              <Address address={connectedAddress} />
-            </div>
-            {tokenBalance !== undefined && (
-              <div className="text-right">
-                <div className="text-sm font-medium text-base-content/70">Token Balance</div>
-                <div className="text-xl font-bold text-primary">{Number(tokenBalance) / 1e18} TBT</div>
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Platform and Username Selection */}
         <div className="bg-base-100 p-8 rounded-3xl shadow-lg mb-8">
           <div className="space-y-6">

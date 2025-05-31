@@ -1,4 +1,5 @@
 import "@rainbow-me/rainbowkit/styles.css";
+import BottomNavbar from "~~/components/BottomNavbar";
 import { ScaffoldEthAppWithProviders } from "~~/components/ScaffoldEthAppWithProviders";
 import { ThemeProvider } from "~~/components/ThemeProvider";
 import "~~/styles/globals.css";
@@ -11,7 +12,12 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
     <html suppressHydrationWarning>
       <body>
         <ThemeProvider enableSystem>
-          <ScaffoldEthAppWithProviders>{children}</ScaffoldEthAppWithProviders>
+          <ScaffoldEthAppWithProviders>
+            <div className="min-h-screen flex flex-col">
+              <main className="flex-grow pb-20">{children}</main>
+              <BottomNavbar />
+            </div>
+          </ScaffoldEthAppWithProviders>
         </ThemeProvider>
       </body>
     </html>
