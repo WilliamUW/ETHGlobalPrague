@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth/useDeployedContractInfo";
@@ -127,6 +127,7 @@ const Home = () => {
   const [isSubmitExpanded, setIsSubmitExpanded] = useState(false);
   const [linkInput, setLinkInput] = useState("https://x.com/HeyWilliamWang");
   const [reportingReview, setReportingReview] = useState<number | null>(null);
+  const [lastTxHash, setLastTxHash] = useState<`0x${string}` | null>(null);
 
   const { data: deployedContractData } = useDeployedContractInfo("YourContract");
 
@@ -145,6 +146,21 @@ const Home = () => {
   const { isLoading: isSubmitting } = useWaitForTransactionReceipt({
     hash,
   });
+
+  // Update lastTxHash when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLastTxHash(hash);
+    }
+  }, [hash]);
+
+  // Reset form when transaction is complete
+  useEffect(() => {
+    if (!isSubmitting && lastTxHash) {
+      setDescription("");
+      setIsSubmitExpanded(false);
+    }
+  }, [isSubmitting, lastTxHash]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -342,6 +358,19 @@ const Home = () => {
                   </div>
                 )}
               </button>
+
+              {lastTxHash && (
+                <div className="text-sm text-base-content/70 text-center">
+                  <a
+                    href={`https://coston2-explorer.flare.network/tx/${lastTxHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link link-primary"
+                  >
+                    View transaction on Coston2 Explorer
+                  </a>
+                </div>
+              )}
 
               {!username && (
                 <div className="text-sm text-base-content/70 text-center">
