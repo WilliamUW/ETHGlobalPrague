@@ -128,6 +128,7 @@ const Home = () => {
   const [linkInput, setLinkInput] = useState("https://x.com/HeyWilliamWang");
   const [reportingReview, setReportingReview] = useState<number | null>(null);
   const [lastTxHash, setLastTxHash] = useState<`0x${string}` | null>(null);
+  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "success">("idle");
 
   const { data: deployedContractData } = useDeployedContractInfo("YourContract");
 
@@ -151,6 +152,7 @@ const Home = () => {
   useEffect(() => {
     if (hash) {
       setLastTxHash(hash);
+      setSubmissionStatus("submitting");
     }
   }, [hash]);
 
@@ -159,6 +161,11 @@ const Home = () => {
     if (!isSubmitting && lastTxHash) {
       setDescription("");
       setIsSubmitExpanded(false);
+      setSubmissionStatus("success");
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setSubmissionStatus("idle");
+      }, 3000);
     }
   }, [isSubmitting, lastTxHash]);
 
@@ -167,6 +174,7 @@ const Home = () => {
     if (!username || !description || !deployedContractData?.address) return;
 
     try {
+      setSubmissionStatus("submitting");
       writeContract({
         address: deployedContractData.address,
         abi: deployedContractData.abi,
@@ -175,6 +183,7 @@ const Home = () => {
       });
     } catch (error) {
       console.error("Error submitting review:", error);
+      setSubmissionStatus("idle");
     }
   };
 
@@ -343,40 +352,57 @@ const Home = () => {
                 <div className="mt-1 text-sm text-base-content/70">{description.length}/500 characters</div>
               </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className={`btn btn-primary w-full ${isSubmitting ? "loading" : ""}`}
-                disabled={isSubmitting || !username || !description}
-              >
-                {isSubmitting ? (
-                  "Submitting..."
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span>Submit Review</span>
-                    <span className="text-sm opacity-80">({rating}★)</span>
+              {/* Submit Button and Status */}
+              <div className="space-y-4">
+                <button
+                  type="submit"
+                  className={`btn btn-primary w-full ${submissionStatus === "submitting" ? "opacity-50" : ""}`}
+                  disabled={submissionStatus === "submitting" || !username || !description}
+                >
+                  {submissionStatus === "submitting" ? (
+                    <div className="flex items-center gap-2">
+                      <span>Submitting Review</span>
+                      <span className="text-sm opacity-80">({rating}★)</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>Submit Review</span>
+                      <span className="text-sm opacity-80">({rating}★)</span>
+                    </div>
+                  )}
+                </button>
+
+                {submissionStatus === "submitting" && (
+                  <div className="space-y-2">
+                    <div className="w-full bg-base-200 rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full animate-[progress_2s_ease-in-out_infinite]"></div>
+                    </div>
+                    <p className="text-sm text-base-content/70 text-center">Submitting review to smart contract...</p>
+                    {lastTxHash && (
+                      <a
+                        href={`https://coston2-explorer.flare.network/tx/${lastTxHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link link-primary text-sm text-center block"
+                      >
+                        View transaction on BlockScout&apos;s Coston2 Explorer
+                      </a>
+                    )}
                   </div>
                 )}
-              </button>
 
-              {lastTxHash && (
-                <div className="text-sm text-base-content/70 text-center">
-                  <a
-                    href={`https://coston2-explorer.flare.network/tx/${lastTxHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="link link-primary"
-                  >
-                    View transaction on Coston2 Explorer
-                  </a>
-                </div>
-              )}
+                {submissionStatus === "success" && (
+                  <div className="text-center space-y-2">
+                    <div className="text-success text-lg font-medium">Review successfully submitted! 🎉</div>
+                  </div>
+                )}
 
-              {!username && (
-                <div className="text-sm text-base-content/70 text-center">
-                  Please select a platform and enter a username to submit a review
-                </div>
-              )}
+                {!username && (
+                  <div className="text-sm text-base-content/70 text-center">
+                    Please select a platform and enter a username to submit a review
+                  </div>
+                )}
+              </div>
             </form>
           )}
         </div>
