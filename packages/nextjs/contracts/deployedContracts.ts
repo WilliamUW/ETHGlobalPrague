@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     YourContract: {
-      address: "0xb19b36b1456e65e3a6d514d3f715f204bd59f431",
+      address: "0x8ce361602b935680e8dec218b820ff5056beb7af",
       abi: [
         {
           type: "constructor",
@@ -109,6 +109,11 @@ const deployedContracts = {
           name: "getAllReviews",
           inputs: [
             {
+              name: "_platform",
+              type: "uint8",
+              internalType: "enum YourContract.Platform",
+            },
+            {
               name: "_username",
               type: "string",
               internalType: "string",
@@ -150,6 +155,11 @@ const deployedContracts = {
           name: "getReview",
           inputs: [
             {
+              name: "_platform",
+              type: "uint8",
+              internalType: "enum YourContract.Platform",
+            },
+            {
               name: "_username",
               type: "string",
               internalType: "string",
@@ -188,6 +198,11 @@ const deployedContracts = {
           type: "function",
           name: "getReviewCount",
           inputs: [
+            {
+              name: "_platform",
+              type: "uint8",
+              internalType: "enum YourContract.Platform",
+            },
             {
               name: "_username",
               type: "string",
@@ -244,6 +259,30 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "platformUsernames",
+          inputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "",
+              type: "uint8",
+              internalType: "enum YourContract.Platform",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "premium",
           inputs: [],
           outputs: [
@@ -273,6 +312,11 @@ const deployedContracts = {
           name: "submitReview",
           inputs: [
             {
+              name: "_platform",
+              type: "uint8",
+              internalType: "enum YourContract.Platform",
+            },
+            {
               name: "_username",
               type: "string",
               internalType: "string",
@@ -296,6 +340,11 @@ const deployedContracts = {
           name: "submitUsername",
           inputs: [
             {
+              name: "_platform",
+              type: "uint8",
+              internalType: "enum YourContract.Platform",
+            },
+            {
               name: "_username",
               type: "string",
               internalType: "string",
@@ -308,25 +357,6 @@ const deployedContracts = {
           type: "function",
           name: "symbol",
           inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "string",
-              internalType: "string",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "telegramUsername",
-          inputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
           outputs: [
             {
               name: "",
@@ -502,6 +532,12 @@ const deployedContracts = {
           name: "ReviewSubmitted",
           inputs: [
             {
+              name: "platform",
+              type: "uint8",
+              indexed: true,
+              internalType: "enum YourContract.Platform",
+            },
+            {
               name: "username",
               type: "string",
               indexed: true,
@@ -564,6 +600,12 @@ const deployedContracts = {
               internalType: "address",
             },
             {
+              name: "platform",
+              type: "uint8",
+              indexed: true,
+              internalType: "enum YourContract.Platform",
+            },
+            {
               name: "username",
               type: "string",
               indexed: false,
@@ -574,7 +616,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748688355.json",
+      deploymentFile: "run-1748688520.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

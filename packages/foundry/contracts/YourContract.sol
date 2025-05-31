@@ -23,9 +23,13 @@ contract YourContract {
     // Events: a way to emit log statements from smart contract that can be listened to by external parties
     event GreetingChange(address indexed greetingSetter, string newGreeting, bool premium, uint256 value);
 
+    // --- Platform Enum ---
+    enum Platform { Telegram, Twitter, LinkedIn }
+
     // --- Username Mapping ---
-    mapping(address => string) public telegramUsername;
-    event UsernameUpdated(address indexed user, string username);
+    // Maps (address, platform) => username
+    mapping(address => mapping(Platform => string)) public platformUsernames;
+    event UsernameUpdated(address indexed user, Platform indexed platform, string username);
 
     // --- Review System ---
     struct Review {
@@ -34,8 +38,10 @@ contract YourContract {
         string description;
         uint256 timestamp;
     }
-    mapping(string => Review[]) private reviews;
+    // Maps (platform, username) => array of reviews
+    mapping(Platform => mapping(string => Review[])) private reviews;
     event ReviewSubmitted(
+        Platform indexed platform,
         string indexed username,
         address indexed reviewer,
         uint8 rating,
@@ -108,14 +114,14 @@ contract YourContract {
     receive() external payable { }
 
     // --- Username Functions ---
-    function submitUsername(string calldata _username) external {
+    function submitUsername(Platform _platform, string calldata _username) external {
         require(bytes(_username).length > 0, "Username cannot be empty");
-        telegramUsername[msg.sender] = _username;
-        emit UsernameUpdated(msg.sender, _username);
+        platformUsernames[msg.sender][_platform] = _username;
+        emit UsernameUpdated(msg.sender, _platform, _username);
     }
 
     // --- Review Functions ---
-    function submitReview(string calldata _username, uint8 _rating, string calldata _description) external {
+    function submitReview(Platform _platform, string calldata _username, uint8 _rating, string calldata _description) external {
         require(bytes(_username).length > 0, "Username cannot be empty");
         require(_rating >= 1 && _rating <= 5, "Rating must be 1-5");
 
@@ -125,30 +131,30 @@ contract YourContract {
             description: _description,
             timestamp: block.timestamp
         });
-        reviews[_username].push(newReview);
-        emit ReviewSubmitted(_username, msg.sender, _rating, _description);
+        reviews[_platform][_username].push(newReview);
+        emit ReviewSubmitted(_platform, _username, msg.sender, _rating, _description);
 
         // Mint 1 TBT to reviewer
-        _mint(msg.sender, 1);
+        _mint(msg.sender, 1 * 10 ** uint256(decimals));
     }
 
-    function getReviewCount(string calldata _username) external view returns (uint256) {
-        return reviews[_username].length;
+    function getReviewCount(Platform _platform, string calldata _username) external view returns (uint256) {
+        return reviews[_platform][_username].length;
     }
 
-    function getReview(string calldata _username, uint256 index) external view returns (
+    function getReview(Platform _platform, string calldata _username, uint256 index) external view returns (
         address reviewer,
         uint8 rating,
         string memory description,
         uint256 timestamp
     ) {
-        require(index < reviews[_username].length, "Review index out of bounds");
-        Review storage r = reviews[_username][index];
+        require(index < reviews[_platform][_username].length, "Review index out of bounds");
+        Review storage r = reviews[_platform][_username][index];
         return (r.reviewer, r.rating, r.description, r.timestamp);
     }
 
-    function getAllReviews(string calldata _username) external view returns (Review[] memory) {
-        return reviews[_username];
+    function getAllReviews(Platform _platform, string calldata _username) external view returns (Review[] memory) {
+        return reviews[_platform][_username];
     }
 
     // --- ERC20 Functions ---
