@@ -128,12 +128,28 @@ const Home = () => {
   return (
     <div className="flex items-center flex-col grow pt-10">
       <div className="px-5 w-full max-w-2xl">
+        {/* Connected Address and Token Balance Display */}
+        <div className="bg-base-100 p-6 rounded-3xl shadow-lg mb-8">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-base-content/70">Connected Address</div>
+              <Address address={connectedAddress} />
+            </div>
+            {tokenBalance !== undefined && (
+              <div className="text-right">
+                <div className="text-sm font-medium text-base-content/70">Token Balance</div>
+                <div className="text-xl font-bold text-primary">{Number(tokenBalance) / 1e18} TBT</div>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Platform and Username Selection */}
         <div className="bg-base-100 p-8 rounded-3xl shadow-lg mb-8">
           <div className="space-y-6">
             {/* Link Input */}
             <div>
-              <label className="block text-sm font-medium mb-2">Or paste a profile link</label>
+              <label className="block text-sm font-medium mb-2">Paste a Profile Link</label>
               <input
                 type="text"
                 className="input input-bordered w-full"
@@ -307,22 +323,6 @@ const Home = () => {
             ) : (
               <div className="text-center text-base-content/70 py-8">
                 {username ? "No reviews found" : "Enter a username to view reviews"}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Connected Address and Token Balance Display */}
-        <div className="mt-8 pt-8 border-t">
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm font-medium mb-2">Connected Address:</div>
-              <Address address={connectedAddress} />
-            </div>
-            {tokenBalance !== undefined && (
-              <div>
-                <div className="text-sm font-medium mb-2">Token Balance:</div>
-                <div className="text-lg font-bold">{Number(tokenBalance) / 1e18} TBT</div>
               </div>
             )}
           </div>
