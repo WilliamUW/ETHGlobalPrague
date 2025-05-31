@@ -12,6 +12,112 @@ interface Review {
   timestamp: bigint;
 }
 
+const TIER_THRESHOLDS = {
+  BRONZE: 0,
+  SILVER: 10,
+  GOLD: 50,
+  PLATINUM: 100,
+  DIAMOND: 500,
+};
+
+const TIER_COLORS = {
+  BRONZE: "text-amber-600",
+  SILVER: "text-gray-400",
+  GOLD: "text-yellow-500",
+  PLATINUM: "text-blue-400",
+  DIAMOND: "text-purple-500",
+};
+
+const TIER_ICONS = {
+  BRONZE: "🥉",
+  SILVER: "🥈",
+  GOLD: "🥇",
+  PLATINUM: "💎",
+  DIAMOND: "👑",
+};
+
+const getTier = (balance: number) => {
+  if (balance >= TIER_THRESHOLDS.DIAMOND) return "DIAMOND";
+  if (balance >= TIER_THRESHOLDS.PLATINUM) return "PLATINUM";
+  if (balance >= TIER_THRESHOLDS.GOLD) return "GOLD";
+  if (balance >= TIER_THRESHOLDS.SILVER) return "SILVER";
+  return "BRONZE";
+};
+
+interface ReviewCardProps {
+  review: Review;
+  connectedAddress?: `0x${string}`;
+  contractAddress?: `0x${string}`;
+  contractAbi?: any;
+  onReport: (index: number) => void;
+  isReporting: boolean;
+}
+
+const ReviewCard = ({
+  review,
+  connectedAddress,
+  contractAddress,
+  contractAbi,
+  onReport,
+  isReporting,
+}: ReviewCardProps) => {
+  const { data: reviewerBalance } = useReadContract({
+    address: contractAddress,
+    abi: contractAbi,
+    functionName: "balanceOf",
+    args: [review.reviewer],
+    query: {
+      enabled: !!contractAddress,
+    },
+  });
+
+  const balance = reviewerBalance ? Number(reviewerBalance) / 1e18 : 0;
+  const tier = getTier(balance);
+
+  const renderStars = (rating: number, size: "sm" | "md" = "md") => {
+    const stars = [];
+    const sizeClass = size === "sm" ? "text-sm" : "text-lg";
+
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <span key={i} className={`${i <= rating ? "text-yellow-500" : "text-gray-300"} ${sizeClass}`}>
+          ★
+        </span>,
+      );
+    }
+    return <div className="flex gap-0.5">{stars}</div>;
+  };
+
+  return (
+    <div className="bg-base-200 p-6 rounded-xl hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-start mb-3">
+        <div className="space-y-1">
+          <div className="font-medium flex items-center gap-2">
+            <Address address={review.reviewer} />
+            {review.reviewer === connectedAddress && (
+              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
+            )}
+            <span className={`text-sm ${TIER_COLORS[tier]} flex items-center gap-1`}>
+              {TIER_ICONS[tier]} {tier}
+            </span>
+            <span className="text-sm text-base-content/70">({balance.toFixed(1)} TBT)</span>
+          </div>
+          <div className="text-sm text-base-content/70">
+            {new Date(Number(review.timestamp) * 1000).toLocaleString()}
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          {renderStars(review.rating, "sm")}
+          <button className="btn btn-ghost btn-sm" onClick={() => onReport(0)} disabled={isReporting}>
+            {isReporting ? "Reported" : "Report"}
+          </button>
+        </div>
+      </div>
+      <div className="text-base-content/90 leading-relaxed">{review.description}</div>
+    </div>
+  );
+};
+
 const Home = () => {
   const { address: connectedAddress } = useAccount();
   const [platform, setPlatform] = useState(0);
@@ -26,28 +132,28 @@ const Home = () => {
 
   const { writeContract, data: hash } = useWriteContract();
 
-  const { isLoading: isSubmitting } = useWaitForTransactionReceipt({
-    hash,
-  });
-
   const { data: reviews = [] } = useReadContract({
-    address: deployedContractData?.address,
+    address: deployedContractData?.address as `0x${string}`,
     abi: deployedContractData?.abi,
     functionName: "getAllReviews",
     args: [platform, username],
     query: {
-      enabled: !!username,
+      enabled: !!username && !!deployedContractData?.address,
     },
   }) as { data: Review[] | undefined };
 
   const { data: tokenBalance } = useReadContract({
-    address: deployedContractData?.address,
+    address: deployedContractData?.address as `0x${string}`,
     abi: deployedContractData?.abi,
     functionName: "balanceOf",
     args: [connectedAddress],
     query: {
       enabled: !!connectedAddress && !!deployedContractData?.address,
     },
+  });
+
+  const { isLoading: isSubmitting } = useWaitForTransactionReceipt({
+    hash,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -293,32 +399,15 @@ const Home = () => {
           <div className="space-y-4">
             {reviews && reviews.length > 0 ? (
               reviews.map((review, index) => (
-                <div key={index} className="bg-base-200 p-6 rounded-xl hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="space-y-1">
-                      <div className="font-medium flex items-center gap-2">
-                        <Address address={review.reviewer} />
-                        {review.reviewer === connectedAddress && (
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
-                        )}
-                      </div>
-                      <div className="text-sm text-base-content/70">
-                        {new Date(Number(review.timestamp) * 1000).toLocaleString()}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {renderStars(review.rating, "sm")}
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => handleReport(index)}
-                        disabled={reportingReview === index}
-                      >
-                        {reportingReview === index ? "Reported" : "Report"}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="text-base-content/90 leading-relaxed">{review.description}</div>
-                </div>
+                <ReviewCard
+                  key={index}
+                  review={review}
+                  connectedAddress={connectedAddress as `0x${string}`}
+                  contractAddress={deployedContractData?.address as `0x${string}`}
+                  contractAbi={deployedContractData?.abi}
+                  onReport={handleReport}
+                  isReporting={reportingReview === index}
+                />
               ))
             ) : (
               <div className="text-center text-base-content/70 py-8">
