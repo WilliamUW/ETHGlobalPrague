@@ -2,7 +2,8 @@
 src = "contracts"
 out = "out"
 libs = ["lib"]
-solc = "0.8.20"
+solc = "0.8.19"
+evm_version = "london"
 remappings = [
     "@openzeppelin/=lib/openzeppelin-contracts/",
     "forge-std/=lib/forge-std/src/"
