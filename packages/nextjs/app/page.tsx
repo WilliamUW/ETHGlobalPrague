@@ -18,10 +18,7 @@ const Home = () => {
   const [username, setUsername] = useState("");
   const [rating, setRating] = useState(5);
   const [description, setDescription] = useState("");
-
-  // Search state
-  const [searchPlatform, setSearchPlatform] = useState(0);
-  const [searchUsername, setSearchUsername] = useState("");
+  const [isSubmitExpanded, setIsSubmitExpanded] = useState(false);
 
   const { data: deployedContractData } = useDeployedContractInfo("YourContract");
 
@@ -35,9 +32,9 @@ const Home = () => {
     address: deployedContractData?.address,
     abi: deployedContractData?.abi,
     functionName: "getAllReviews",
-    args: [searchPlatform, searchUsername],
+    args: [platform, username],
     query: {
-      enabled: !!searchUsername,
+      enabled: !!username,
     },
   }) as { data: Review[] | undefined };
 
@@ -60,15 +57,9 @@ const Home = () => {
   return (
     <div className="flex items-center flex-col grow pt-10">
       <div className="px-5 w-full max-w-2xl">
-        <h1 className="text-center mb-8">
-          <span className="block text-4xl font-bold">Review System</span>
-        </h1>
-
-        {/* Submit Review Form */}
+        {/* Platform and Username Selection */}
         <div className="bg-base-100 p-8 rounded-3xl shadow-lg mb-8">
-          <h2 className="text-2xl font-bold mb-6">Submit a Review</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Platform Selection */}
+          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-2">Platform</label>
               <select
@@ -82,7 +73,6 @@ const Home = () => {
               </select>
             </div>
 
-            {/* Username Input */}
             <div>
               <label className="block text-sm font-medium mb-2">Username</label>
               <input
@@ -91,78 +81,67 @@ const Home = () => {
                 placeholder="Enter username"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                required
               />
             </div>
+          </div>
+        </div>
 
-            {/* Rating Selection */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Rating</label>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map(star => (
-                  <button
-                    key={star}
-                    type="button"
-                    className={`btn btn-circle ${rating === star ? "btn-primary" : "btn-ghost"}`}
-                    onClick={() => setRating(star)}
-                  >
-                    {star}
-                  </button>
-                ))}
+        {/* Submit Review Form */}
+        <div className="bg-base-100 p-8 rounded-3xl shadow-lg mb-8">
+          <button
+            className="w-full flex justify-between items-center text-2xl font-bold mb-6"
+            onClick={() => setIsSubmitExpanded(!isSubmitExpanded)}
+          >
+            <span>Submit a Review</span>
+            <span className="text-2xl">{isSubmitExpanded ? "−" : "+"}</span>
+          </button>
+
+          {isSubmitExpanded && (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Rating Selection */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Rating</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      className={`btn btn-circle ${rating === star ? "btn-primary" : "btn-ghost"}`}
+                      onClick={() => setRating(star)}
+                    >
+                      {star}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Description Input */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Review Description</label>
-              <textarea
-                className="textarea textarea-bordered w-full h-24"
-                placeholder="Write your review here..."
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                required
-              />
-            </div>
+              {/* Description Input */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Review Description</label>
+                <textarea
+                  className="textarea textarea-bordered w-full h-24"
+                  placeholder="Write your review here..."
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  required
+                />
+              </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={isSubmitting || !username || !description}
-            >
-              {isSubmitting ? "Submitting..." : "Submit Review"}
-            </button>
-          </form>
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={isSubmitting || !username || !description}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Review"}
+              </button>
+            </form>
+          )}
         </div>
 
         {/* View Reviews Section */}
         <div className="bg-base-100 p-8 rounded-3xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-6">View Reviews</h2>
-          <div className="space-y-6 mb-8">
-            <div>
-              <label className="block text-sm font-medium mb-2">Platform</label>
-              <select
-                className="select select-bordered w-full"
-                value={searchPlatform}
-                onChange={e => setSearchPlatform(Number(e.target.value))}
-              >
-                <option value={0}>Telegram</option>
-                <option value={1}>Twitter</option>
-                <option value={2}>LinkedIn</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Username</label>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                placeholder="Enter username to search"
-                value={searchUsername}
-                onChange={e => setSearchUsername(e.target.value)}
-              />
-            </div>
-          </div>
+          <h2 className="text-2xl font-bold mb-6">Reviews</h2>
 
           {/* Reviews Display */}
           <div className="space-y-4">
@@ -188,7 +167,7 @@ const Home = () => {
               ))
             ) : (
               <p className="text-center text-base-content/70">
-                {searchUsername ? "No reviews found" : "Enter a username to search for reviews"}
+                {username ? "No reviews found" : "Enter a username to view reviews"}
               </p>
             )}
           </div>
