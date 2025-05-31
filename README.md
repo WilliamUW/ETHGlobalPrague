@@ -1,5 +1,7 @@
 # 🏗 Scaffold-ETH 2
 
+yarn foundry:deploy --rpc-url coston2
+
 <h4 align="center">
   <a href="https://docs.scaffoldeth.io">Documentation</a> |
   <a href="https://scaffoldeth.io">Website</a>
