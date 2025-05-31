@@ -39,6 +39,16 @@ const Home = () => {
     },
   }) as { data: Review[] | undefined };
 
+  const { data: tokenBalance } = useReadContract({
+    address: deployedContractData?.address,
+    abi: deployedContractData?.abi,
+    functionName: "balanceOf",
+    args: [connectedAddress],
+    query: {
+      enabled: !!connectedAddress && !!deployedContractData?.address,
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !description || !deployedContractData?.address) return;
@@ -85,7 +95,6 @@ const Home = () => {
         return;
       }
     } catch (error) {
-      // Invalid URL, do nothing
       console.error("Invalid URL:", error);
     }
   };
@@ -221,10 +230,20 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Connected Address Display */}
+        {/* Connected Address and Token Balance Display */}
         <div className="mt-8 pt-8 border-t">
-          <p className="text-sm font-medium mb-2">Connected Address:</p>
-          <Address address={connectedAddress} />
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium mb-2">Connected Address:</p>
+              <Address address={connectedAddress} />
+            </div>
+            {tokenBalance !== undefined && (
+              <div>
+                <p className="text-sm font-medium mb-2">Token Balance:</p>
+                <p className="text-lg font-bold">{Number(tokenBalance) / 1e18} TBT</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
