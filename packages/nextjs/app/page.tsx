@@ -13,7 +13,7 @@ interface Review {
   timestamp: bigint;
 }
 
-const TIER_THRESHOLDS = {
+export const TIER_THRESHOLDS = {
   BRONZE: 0,
   SILVER: 1,
   GOLD: 5,
@@ -21,7 +21,7 @@ const TIER_THRESHOLDS = {
   PLATINUM: 20,
 };
 
-const TIER_COLORS = {
+export const TIER_COLORS = {
   BRONZE: "text-amber-600",
   SILVER: "text-gray-400",
   GOLD: "text-yellow-500",
@@ -29,7 +29,7 @@ const TIER_COLORS = {
   DIAMOND: "text-purple-500",
 };
 
-const TIER_ICONS = {
+export const TIER_ICONS = {
   BRONZE: "🥉",
   SILVER: "🥈",
   GOLD: "🥇",
@@ -37,13 +37,17 @@ const TIER_ICONS = {
   DIAMOND: "💎",
 };
 
-const getTier = (balance: number) => {
+export type Tier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | "DIAMOND";
+
+
+export const getTier = (balance: number): Tier => {
   if (balance >= TIER_THRESHOLDS.DIAMOND) return "DIAMOND";
   if (balance >= TIER_THRESHOLDS.PLATINUM) return "PLATINUM";
   if (balance >= TIER_THRESHOLDS.GOLD) return "GOLD";
   if (balance >= TIER_THRESHOLDS.SILVER) return "SILVER";
   return "BRONZE";
 };
+
 
 interface ReviewCardProps {
   review: Review;

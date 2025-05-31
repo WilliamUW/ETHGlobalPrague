@@ -1,42 +1,10 @@
 "use client";
 
+import {TIER_COLORS, TIER_ICONS, TIER_THRESHOLDS, Tier, getTier} from "../page";
 import { useAccount, useReadContract } from "wagmi";
+
 import { Address } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth/useDeployedContractInfo";
-
-type Tier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | "DIAMOND";
-
-const TIER_THRESHOLDS: Record<Tier, number> = {
-  BRONZE: 0,
-  SILVER: 1,
-  GOLD: 5,
-  PLATINUM: 10,
-  DIAMOND: 20,
-};
-
-const TIER_COLORS: Record<Tier, string> = {
-  BRONZE: "text-amber-600",
-  SILVER: "text-gray-400",
-  GOLD: "text-yellow-500",
-  PLATINUM: "text-blue-400",
-  DIAMOND: "text-purple-500",
-};
-
-const TIER_ICONS: Record<Tier, string> = {
-  BRONZE: "🥉",
-  SILVER: "🥈",
-  GOLD: "🥇",
-  PLATINUM: "💎",
-  DIAMOND: "👑",
-};
-
-const getTier = (balance: number): Tier => {
-  if (balance >= TIER_THRESHOLDS.DIAMOND) return "DIAMOND";
-  if (balance >= TIER_THRESHOLDS.PLATINUM) return "PLATINUM";
-  if (balance >= TIER_THRESHOLDS.GOLD) return "GOLD";
-  if (balance >= TIER_THRESHOLDS.SILVER) return "SILVER";
-  return "BRONZE";
-};
 
 const Profile = () => {
   const { address: connectedAddress } = useAccount();
