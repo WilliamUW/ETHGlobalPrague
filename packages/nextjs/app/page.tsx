@@ -120,12 +120,12 @@ const ReviewCard = ({
 
 const Home = () => {
   const { address: connectedAddress } = useAccount();
-  const [platform, setPlatform] = useState(0);
-  const [username, setUsername] = useState("");
+  const [platform, setPlatform] = useState(1);
+  const [username, setUsername] = useState("HeyWilliamWang");
   const [rating, setRating] = useState(5);
   const [description, setDescription] = useState("");
   const [isSubmitExpanded, setIsSubmitExpanded] = useState(false);
-  const [linkInput, setLinkInput] = useState("");
+  const [linkInput, setLinkInput] = useState("https://x.com/HeyWilliamWang");
   const [reportingReview, setReportingReview] = useState<number | null>(null);
 
   const { data: deployedContractData } = useDeployedContractInfo("YourContract");
