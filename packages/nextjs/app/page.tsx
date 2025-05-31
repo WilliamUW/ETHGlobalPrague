@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useEffect, useState } from "react";
+
 import { Address } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth/useDeployedContractInfo";
 
@@ -116,6 +117,34 @@ const ReviewCard = ({
       <div className="text-base-content/90 leading-relaxed">{review.description}</div>
     </div>
   );
+};
+
+interface PlatformInfo {
+  name: string;
+  icon: string;
+  color: string;
+  logo: string;
+}
+
+const PLATFORM_INFO: Record<number, PlatformInfo> = {
+  0: {
+    name: "Telegram",
+    icon: "📱",
+    color: "bg-blue-600",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
+  },
+  1: {
+    name: "Twitter",
+    icon: "🐦",
+    color: "bg-sky-600",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
+  },
+  2: {
+    name: "LinkedIn",
+    icon: "💼",
+    color: "bg-blue-700",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png",
+  },
 };
 
 const Home = () => {
@@ -264,28 +293,48 @@ const Home = () => {
               />
             </div>
 
+            {/* Platform Selection */}
             <div>
               <label className="block text-sm font-medium mb-2">Platform</label>
-              <select
-                className="select select-bordered w-full"
-                value={platform}
-                onChange={e => setPlatform(Number(e.target.value))}
-              >
-                <option value={0}>Telegram</option>
-                <option value={1}>Twitter</option>
-                <option value={2}>LinkedIn</option>
-              </select>
+              <div className="grid grid-cols-3 gap-3">
+                {Object.entries(PLATFORM_INFO).map(([key, info]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`flex flex-col items-center p-4 rounded-xl transition-all ${
+                      platform === Number(key)
+                        ? `${info.color} text-white`
+                        : "bg-base-200 hover:bg-base-300"
+                    }`}
+                    onClick={() => setPlatform(Number(key))}
+                  >
+                    <img
+                      src={info.logo}
+                      alt={info.name}
+                      className={`w-8 h-8 mb-2 ${platform === Number(key) ? "" : ""}`}
+                    />
+                    <span className="text-sm font-medium">
+                      {info.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">Username</label>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                placeholder="Enter username"
-                value={username}
-                onChange={e => setUsername(e.target.value.replace(/^@+/, ""))}
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  className="input input-bordered w-full pl-12"
+                  placeholder="Enter username"
+                  value={username}
+                  onChange={e => setUsername(e.target.value.replace(/^@+/, ""))}
+                />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">
+                  {PLATFORM_INFO[platform].icon}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -299,9 +348,14 @@ const Home = () => {
             <div className="flex items-center gap-3">
               <span>Submit a Review</span>
               {!isSubmitExpanded && username && (
-                <span className="text-sm font-normal text-base-content/70">
-                  for {["Telegram", "Twitter", "LinkedIn"][platform]}/{username}
-                </span>
+                <div className="flex items-center gap-2 text-sm font-normal text-base-content/70">
+                  <img
+                    src={PLATFORM_INFO[platform].logo}
+                    alt={PLATFORM_INFO[platform].name}
+                    className="w-4 h-4"
+                  />
+                  <span>{PLATFORM_INFO[platform].name}/{username}</span>
+                </div>
               )}
             </div>
             <span className="text-2xl bg-base-200 w-8 h-8 rounded-full flex items-center justify-center">
@@ -410,7 +464,19 @@ const Home = () => {
         {/* View Reviews Section */}
         <div className="bg-base-100 p-8 rounded-3xl shadow-lg">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Reviews</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold">Reviews</h2>
+              {username && (
+                <div className="flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full">
+                  <img
+                    src={PLATFORM_INFO[platform].logo}
+                    alt={PLATFORM_INFO[platform].name}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">{username}</span>
+                </div>
+              )}
+            </div>
             {reviews.length > 0 && (
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
