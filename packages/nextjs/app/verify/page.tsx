@@ -10,8 +10,9 @@ const Verify = () => {
   const { address: connectedAddress } = useAccount();
   const searchParams = useSearchParams();
   const [verifiedHandle, setVerifiedHandle] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
   const { data: deployedContractData } = useDeployedContractInfo("YourContract");
-  const { writeContract } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
 
   const { data: twitterHandle } = useReadContract({
     address: deployedContractData?.address as `0x${string}`,
@@ -40,12 +41,16 @@ const Verify = () => {
     if (!verifiedHandle || !deployedContractData?.address) return;
 
     try {
-      writeContract({
+      const hash = await writeContractAsync({
         address: deployedContractData.address,
         abi: deployedContractData.abi,
         functionName: "submitUsername",
         args: [1, verifiedHandle], // 1 is the Twitter platform enum value
       });
+
+      if (hash) {
+        setTxHash(hash);
+      }
     } catch (error) {
       console.error("Error submitting username:", error);
     }
@@ -127,6 +132,19 @@ const Verify = () => {
                   <p className="text-sm text-base-content/70 text-center">
                     Please connect your wallet to submit the verified handle
                   </p>
+                )}
+                {txHash && (
+                  <div className="mt-4 p-4 bg-base-200 rounded-xl">
+                    <p className="text-sm text-base-content/70 mb-2">Transaction submitted!</p>
+                    <a
+                      href={`https://coston2-explorer.flare.network/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      View on Blockscout
+                    </a>
+                  </div>
                 )}
               </div>
             )}
