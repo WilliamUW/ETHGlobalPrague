@@ -72,7 +72,9 @@ const Home = () => {
 
     // Try to extract platform and username from the link
     try {
-      const url = new URL(value);
+      // Add https:// prefix if not present
+      const urlString = value.startsWith("http") ? value : `https://${value}`;
+      const url = new URL(urlString);
       const path = url.pathname;
 
       // Telegram
@@ -170,52 +172,84 @@ const Home = () => {
         {/* Submit Review Form */}
         <div className="bg-base-100 p-8 rounded-3xl shadow-lg mb-8">
           <button
-            className="w-full flex justify-between items-center text-2xl font-bold mb-6"
+            className="w-full flex justify-between items-center text-2xl font-bold mb-6 hover:opacity-80 transition-opacity"
             onClick={() => setIsSubmitExpanded(!isSubmitExpanded)}
           >
-            <span>Submit a Review</span>
-            <span className="text-2xl">{isSubmitExpanded ? "−" : "+"}</span>
+            <div className="flex items-center gap-3">
+              <span>Submit a Review</span>
+              {!isSubmitExpanded && username && (
+                <span className="text-sm font-normal text-base-content/70">
+                  for {["Telegram", "Twitter", "LinkedIn"][platform]}/{username}
+                </span>
+              )}
+            </div>
+            <span className="text-2xl bg-base-200 w-8 h-8 rounded-full flex items-center justify-center">
+              {isSubmitExpanded ? "−" : "+"}
+            </span>
           </button>
 
           {isSubmitExpanded && (
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Rating Selection */}
               <div>
-                <label className="block text-sm font-medium mb-2">Rating</label>
-                <div className="flex gap-2">
+                <label className="block text-sm font-medium mb-3">How would you rate this profile?</label>
+                <div className="flex gap-3">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button
                       key={star}
                       type="button"
-                      className={`btn btn-circle ${rating === star ? "btn-primary" : "btn-ghost"}`}
+                      className={`flex-1 aspect-square flex items-center justify-center rounded-xl transition-all ${
+                        rating === star ? "bg-primary text-primary-content scale-105" : "bg-base-200 hover:bg-base-300"
+                      }`}
                       onClick={() => setRating(star)}
                     >
-                      {star}
+                      <span className="text-xl font-medium">{star}</span>
                     </button>
                   ))}
+                </div>
+                <div className="mt-2 text-sm text-base-content/70">
+                  {rating === 5 && "Excellent"}
+                  {rating === 4 && "Very Good"}
+                  {rating === 3 && "Good"}
+                  {rating === 2 && "Fair"}
+                  {rating === 1 && "Poor"}
                 </div>
               </div>
 
               {/* Description Input */}
               <div>
-                <label className="block text-sm font-medium mb-2">Review Description</label>
+                <label className="block text-sm font-medium mb-2">Your Review</label>
                 <textarea
-                  className="textarea textarea-bordered w-full h-24"
-                  placeholder="Write your review here..."
+                  className="textarea textarea-bordered w-full h-32 text-base"
+                  placeholder="Share your experience with this profile. What makes them trustworthy or not? What was your interaction like?"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   required
                 />
+                <div className="mt-1 text-sm text-base-content/70">{description.length}/500 characters</div>
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="btn btn-primary w-full"
+                className={`btn btn-primary w-full ${isSubmitting ? "loading" : ""}`}
                 disabled={isSubmitting || !username || !description}
               >
-                {isSubmitting ? "Submitting..." : "Submit Review"}
+                {isSubmitting ? (
+                  "Submitting..."
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span>Submit Review</span>
+                    <span className="text-sm opacity-80">({rating}★)</span>
+                  </div>
+                )}
               </button>
+
+              {!username && (
+                <div className="text-sm text-base-content/70 text-center">
+                  Please select a platform and enter a username to submit a review
+                </div>
+              )}
             </form>
           )}
         </div>
