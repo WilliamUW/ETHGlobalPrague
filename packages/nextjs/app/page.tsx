@@ -39,7 +39,6 @@ export const TIER_ICONS = {
 
 export type Tier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | "DIAMOND";
 
-
 export const getTier = (balance: number): Tier => {
   if (balance >= TIER_THRESHOLDS.DIAMOND) return "DIAMOND";
   if (balance >= TIER_THRESHOLDS.PLATINUM) return "PLATINUM";
@@ -47,7 +46,6 @@ export const getTier = (balance: number): Tier => {
   if (balance >= TIER_THRESHOLDS.SILVER) return "SILVER";
   return "BRONZE";
 };
-
 
 interface ReviewCardProps {
   review: Review;
@@ -306,9 +304,7 @@ const Home = () => {
                     key={key}
                     type="button"
                     className={`flex flex-col items-center p-4 rounded-xl transition-all ${
-                      platform === Number(key)
-                        ? `${info.color} text-white`
-                        : "bg-base-200 hover:bg-base-300"
+                      platform === Number(key) ? `${info.color} text-white` : "bg-base-200 hover:bg-base-300"
                     }`}
                     onClick={() => setPlatform(Number(key))}
                   >
@@ -317,9 +313,7 @@ const Home = () => {
                       alt={info.name}
                       className={`w-8 h-8 mb-2 ${platform === Number(key) ? "" : ""}`}
                     />
-                    <span className="text-sm font-medium">
-                      {info.name}
-                    </span>
+                    <span className="text-sm font-medium">{info.name}</span>
                   </button>
                 ))}
               </div>
@@ -335,9 +329,7 @@ const Home = () => {
                   value={username}
                   onChange={e => setUsername(e.target.value.replace(/^@+/, ""))}
                 />
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">
-                  {PLATFORM_INFO[platform].icon}
-                </div>
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">{PLATFORM_INFO[platform].icon}</div>
               </div>
             </div>
           </div>
@@ -353,12 +345,10 @@ const Home = () => {
               <span>Submit a Review</span>
               {!isSubmitExpanded && username && (
                 <div className="flex items-center gap-2 text-sm font-normal text-base-content/70">
-                  <img
-                    src={PLATFORM_INFO[platform].logo}
-                    alt={PLATFORM_INFO[platform].name}
-                    className="w-4 h-4"
-                  />
-                  <span>{PLATFORM_INFO[platform].name}/{username}</span>
+                  <img src={PLATFORM_INFO[platform].logo} alt={PLATFORM_INFO[platform].name} className="w-4 h-4" />
+                  <span>
+                    {PLATFORM_INFO[platform].name}/{username}
+                  </span>
                 </div>
               )}
             </div>
@@ -472,11 +462,7 @@ const Home = () => {
               <h2 className="text-2xl font-bold">Reviews</h2>
               {username && (
                 <div className="flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full">
-                  <img
-                    src={PLATFORM_INFO[platform].logo}
-                    alt={PLATFORM_INFO[platform].name}
-                    className="w-4 h-4"
-                  />
+                  <img src={PLATFORM_INFO[platform].logo} alt={PLATFORM_INFO[platform].name} className="w-4 h-4" />
                   <span className="text-sm">{username}</span>
                 </div>
               )}

@@ -1,6 +1,6 @@
 "use client";
 
-import {TIER_COLORS, TIER_ICONS, TIER_THRESHOLDS, Tier, getTier} from "../page";
+import { TIER_COLORS, TIER_ICONS, TIER_THRESHOLDS, Tier, getTier } from "../page";
 import { useAccount, useReadContract } from "wagmi";
 
 import { Address } from "~~/components/scaffold-eth";
