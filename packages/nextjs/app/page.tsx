@@ -19,6 +19,7 @@ const Home = () => {
   const [rating, setRating] = useState(5);
   const [description, setDescription] = useState("");
   const [isSubmitExpanded, setIsSubmitExpanded] = useState(false);
+  const [linkInput, setLinkInput] = useState("");
 
   const { data: deployedContractData } = useDeployedContractInfo("YourContract");
 
@@ -54,12 +55,59 @@ const Home = () => {
     }
   };
 
+  const handleLinkInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLinkInput(value);
+
+    // Try to extract platform and username from the link
+    try {
+      const url = new URL(value);
+      const path = url.pathname;
+
+      // Telegram
+      if (url.hostname.includes("t.me")) {
+        setPlatform(0);
+        setUsername(path.slice(1)); // Remove leading slash
+        return;
+      }
+
+      // Twitter/X
+      if (url.hostname.includes("x.com") || url.hostname.includes("twitter.com")) {
+        setPlatform(1);
+        setUsername(path.slice(1)); // Remove leading slash
+        return;
+      }
+
+      // LinkedIn
+      if (url.hostname.includes("linkedin.com")) {
+        setPlatform(2);
+        setUsername(path.split("/in/")[1]?.split("/")[0] || ""); // Extract username from /in/username
+        return;
+      }
+    } catch (error) {
+      // Invalid URL, do nothing
+      console.error("Invalid URL:", error);
+    }
+  };
+
   return (
     <div className="flex items-center flex-col grow pt-10">
       <div className="px-5 w-full max-w-2xl">
         {/* Platform and Username Selection */}
         <div className="bg-base-100 p-8 rounded-3xl shadow-lg mb-8">
           <div className="space-y-6">
+            {/* Link Input */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Or paste a profile link</label>
+              <input
+                type="text"
+                className="input input-bordered w-full"
+                placeholder="https://t.me/username, https://x.com/username, or https://linkedin.com/in/username"
+                value={linkInput}
+                onChange={handleLinkInput}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-2">Platform</label>
               <select
