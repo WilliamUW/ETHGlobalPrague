@@ -14,10 +14,10 @@ interface Review {
 
 const TIER_THRESHOLDS = {
   BRONZE: 0,
-  SILVER: 10,
-  GOLD: 50,
-  PLATINUM: 100,
-  DIAMOND: 500,
+  SILVER: 1,
+  GOLD: 5,
+  PLATINUM: 10,
+  DIAMOND: 20,
 };
 
 const TIER_COLORS = {
