@@ -1,71 +1,124 @@
 "use client";
 
-import Link from "next/link";
-import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth/useDeployedContractInfo";
 
-const Home: NextPage = () => {
+const Home = () => {
   const { address: connectedAddress } = useAccount();
+  const [platform, setPlatform] = useState(0); // 0 = Telegram, 1 = Twitter, 2 = LinkedIn
+  const [username, setUsername] = useState("");
+  const [rating, setRating] = useState(5);
+  const [description, setDescription] = useState("");
+
+  const { data: deployedContractData } = useDeployedContractInfo("YourContract");
+
+  const { writeContract, data: hash } = useWriteContract();
+
+  const { isLoading: isSubmitting } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username || !description || !deployedContractData?.address) return;
+
+    try {
+      writeContract({
+        address: deployedContractData.address,
+        abi: deployedContractData.abi,
+        functionName: "submitReview",
+        args: [platform, username, rating, description],
+      });
+    } catch (error) {
+      console.error("Error submitting review:", error);
+    }
+  };
 
   return (
-    <>
-      <div className="flex items-center flex-col grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <div className="flex justify-center items-center space-x-2 flex-col">
-            <p className="my-2 font-medium">Connected Address:</p>
+    <div className="flex items-center flex-col grow pt-10">
+      <div className="px-5 w-full max-w-2xl">
+        <h1 className="text-center mb-8">
+          <span className="block text-4xl font-bold">Review System</span>
+        </h1>
+
+        <div className="bg-base-100 p-8 rounded-3xl shadow-lg">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Platform Selection */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Platform</label>
+              <select
+                className="select select-bordered w-full"
+                value={platform}
+                onChange={e => setPlatform(Number(e.target.value))}
+              >
+                <option value={0}>Telegram</option>
+                <option value={1}>Twitter</option>
+                <option value={2}>LinkedIn</option>
+              </select>
+            </div>
+
+            {/* Username Input */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Username</label>
+              <input
+                type="text"
+                className="input input-bordered w-full"
+                placeholder="Enter username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Rating Selection */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Rating</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button
+                    key={star}
+                    type="button"
+                    className={`btn btn-circle ${rating === star ? "btn-primary" : "btn-ghost"}`}
+                    onClick={() => setRating(star)}
+                  >
+                    {star}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Description Input */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Review Description</label>
+              <textarea
+                className="textarea textarea-bordered w-full h-24"
+                placeholder="Write your review here..."
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={isSubmitting || !username || !description}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
+
+          {/* Connected Address Display */}
+          <div className="mt-8 pt-8 border-t">
+            <p className="text-sm font-medium mb-2">Connected Address:</p>
             <Address address={connectedAddress} />
-          </div>
-
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
-
-        <div className="grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col md:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
