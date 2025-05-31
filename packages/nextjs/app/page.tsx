@@ -80,21 +80,21 @@ const Home = () => {
       // Telegram
       if (url.hostname.includes("t.me")) {
         setPlatform(0);
-        setUsername(path.slice(1)); // Remove leading slash
+        setUsername(path.slice(1).replace(/^@+/, "")); // Remove leading slash and @
         return;
       }
 
       // Twitter/X
       if (url.hostname.includes("x.com") || url.hostname.includes("twitter.com")) {
         setPlatform(1);
-        setUsername(path.slice(1)); // Remove leading slash
+        setUsername(path.slice(1).replace(/^@+/, "")); // Remove leading slash and @
         return;
       }
 
       // LinkedIn
       if (url.hostname.includes("linkedin.com")) {
         setPlatform(2);
-        setUsername(path.split("/in/")[1]?.split("/")[0] || ""); // Extract username from /in/username
+        setUsername((path.split("/in/")[1]?.split("/")[0] || "").replace(/^@+/, "")); // Extract username and remove @
         return;
       }
     } catch (error) {
@@ -163,7 +163,7 @@ const Home = () => {
                 className="input input-bordered w-full"
                 placeholder="Enter username"
                 value={username}
-                onChange={e => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value.replace(/^@+/, ""))}
               />
             </div>
           </div>
