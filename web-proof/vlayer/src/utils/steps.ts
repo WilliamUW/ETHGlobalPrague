@@ -1,10 +1,10 @@
 import {
   ConnectWalletStep,
+  InstallExtension,
   MintStep,
   ProveStep,
   SuccessStep,
   WelcomeScreen,
-  InstallExtension,
 } from "../components";
 
 export type Step = {
@@ -71,8 +71,8 @@ export const steps: Step[] = [
     kind: STEP_KIND.MINT,
     backUrl: "/start-proving",
     component: MintStep,
-    title: "X NFT",
-    description: `You are all set to mint your unique X NFT, a true reflection of your verified identity.`,
+    title: "Verify Twitter Handle",
+    description: `You are all set to verify your Twitter handle ownership. This will create a cryptographic proof that you own the account.`,
     index: 3,
   },
   {

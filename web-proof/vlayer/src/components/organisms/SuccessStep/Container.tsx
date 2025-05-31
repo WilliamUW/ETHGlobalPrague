@@ -1,6 +1,6 @@
-import { useSearchParams } from "react-router";
-import { useAccount } from "wagmi";
 import { SuccessStepPresentational } from "./Presentational";
+import { useAccount } from "wagmi";
+import { useSearchParams } from "react-router";
 
 export const SuccessStep = () => {
   const { chain } = useAccount();

@@ -1,5 +1,6 @@
-import { Link } from "react-router";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
+import { useEffect } from "react";
+
 export const SuccessStepPresentational = ({
   tx,
   handle,
@@ -9,10 +10,19 @@ export const SuccessStepPresentational = ({
   handle: string;
   blockExplorer?: string;
 }) => {
+  // Redirect back to main app with the verified handle
+  useEffect(() => {
+    const redirectTimer = setTimeout(() => {
+      window.location.href = `http://localhost:3000/verify?handle=${handle}`;
+    }, 2000); // Wait 2 seconds before redirecting
+
+    return () => clearTimeout(redirectTimer);
+  }, [handle]);
+
   return (
     <>
       <p className="text-gray-500">
-        @{handle} was minted to{" "}
+        @{handle} was verified successfully!{" "}
         <a
           href={`${blockExplorer}/tx/${tx}`}
           target="_blank"
@@ -34,11 +44,9 @@ export const SuccessStepPresentational = ({
           <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5 ml-1" />
         </a>
       </p>
-      <div className="mt-2 flex justify-center">
-        <Link to="/" id="nextButton">
-          Start again
-        </Link>
-      </div>
+      <p className="text-gray-500 mt-4">
+        Redirecting back to main app...
+      </p>
     </>
   );
 };
