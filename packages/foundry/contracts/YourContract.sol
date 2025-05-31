@@ -3,6 +3,8 @@ pragma solidity ^0.8.0;
 
 // Useful for debugging. Remove when deploying to a live network.
 import "forge-std/console.sol";
+import {ContractRegistry} from "@flarenetwork/flare-periphery-contracts/coston2/ContractRegistry.sol";
+import {RandomNumberV2Interface} from "@flarenetwork/flare-periphery-contracts/coston2/RandomNumberV2Interface.sol";
 
 // Use openzeppelin to inherit battle-tested implementations (ERC20, ERC721, etc)
 // import "@openzeppelin/contracts/access/Ownable.sol";
@@ -19,9 +21,11 @@ contract YourContract {
     bool public premium = false;
     uint256 public totalCounter = 0;
     mapping(address => uint256) public userGreetingCounter;
+    RandomNumberV2Interface internal randomV2;
 
     // Events: a way to emit log statements from smart contract that can be listened to by external parties
     event GreetingChange(address indexed greetingSetter, string newGreeting, bool premium, uint256 value);
+    event RandomNumberGenerated(uint256 randomNumber, uint256 timestamp);
 
     // --- Platform Enum ---
     enum Platform { Telegram, Twitter, LinkedIn }
@@ -63,6 +67,7 @@ contract YourContract {
     // Check packages/foundry/deploy/Deploy.s.sol
     constructor(address _owner) {
         owner = _owner;
+        randomV2 = ContractRegistry.getRandomNumberV2();
     }
 
     // Modifier: used to define a set of rules that must be met before or after a function is executed
@@ -191,5 +196,19 @@ contract YourContract {
         totalSupply += _value;
         balanceOf[_to] += _value;
         emit Transfer(address(0), _to, _value);
+    }
+
+    /**
+     * Fetch the latest secure random number.
+     * The random number is generated every 90 seconds.
+     */
+    function getSecureRandomNumber()
+        external
+        view
+        returns (uint256 randomNumber, bool isSecure, uint256 timestamp)
+    {
+        (randomNumber, isSecure, timestamp) = randomV2.getRandomNumber();
+        require(isSecure, "Random number is not secure");
+        return (randomNumber, isSecure, timestamp);
     }
 }

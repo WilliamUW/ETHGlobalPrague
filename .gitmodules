@@ -7,3 +7,6 @@
 [submodule "packages/foundry/lib/solidity-bytes-utils"]
 	path = packages/foundry/lib/solidity-bytes-utils
 	url = https://github.com/gnsps/solidity-bytes-utils
+[submodule "packages/foundry/lib/flare-foundry-periphery-package"]
+	path = packages/foundry/lib/flare-foundry-periphery-package
+	url = https://github.com/flare-foundation/flare-foundry-periphery-package

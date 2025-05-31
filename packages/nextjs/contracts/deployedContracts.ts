@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   114: {
     YourContract: {
-      address: "0x8822a10bd77231fc844e63a8725c40491dade1a2",
+      address: "0xa03efe2c6506813f77d0edbb43eb74714e61109f",
       abi: [
         {
           type: "constructor",
@@ -212,6 +212,29 @@ const deployedContracts = {
           outputs: [
             {
               name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getSecureRandomNumber",
+          inputs: [],
+          outputs: [
+            {
+              name: "randomNumber",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "isSecure",
+              type: "bool",
+              internalType: "bool",
+            },
+            {
+              name: "timestamp",
               type: "uint256",
               internalType: "uint256",
             },
@@ -529,6 +552,25 @@ const deployedContracts = {
         },
         {
           type: "event",
+          name: "RandomNumberGenerated",
+          inputs: [
+            {
+              name: "randomNumber",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
           name: "ReviewSubmitted",
           inputs: [
             {
@@ -616,7 +658,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748702654.json",
+      deploymentFile: "run-1748707052.json",
       deploymentScript: "Deploy.s.sol",
     },
   },
@@ -835,6 +877,29 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "getSecureRandomNumber",
+          inputs: [],
+          outputs: [
+            {
+              name: "randomNumber",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "isSecure",
+              type: "bool",
+              internalType: "bool",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "greeting",
           inputs: [],
           outputs: [
@@ -1135,6 +1200,25 @@ const deployedContracts = {
             },
             {
               name: "value",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "RandomNumberGenerated",
+          inputs: [
+            {
+              name: "randomNumber",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "timestamp",
               type: "uint256",
               indexed: false,
               internalType: "uint256",
