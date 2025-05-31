@@ -199,11 +199,13 @@ const Home = () => {
                       key={star}
                       type="button"
                       className={`flex-1 aspect-square flex items-center justify-center rounded-xl transition-all ${
-                        rating === star ? "bg-primary text-primary-content scale-105" : "bg-base-200 hover:bg-base-300"
+                        rating >= star ? "bg-primary/10" : "bg-base-200 hover:bg-base-300"
                       }`}
                       onClick={() => setRating(star)}
                     >
-                      <span className="text-xl font-medium">{star}</span>
+                      <span className={`text-2xl ${rating >= star ? "text-yellow-500" : "text-gray-300"}`}>
+                        {rating >= star ? "★" : "☆"}
+                      </span>
                     </button>
                   ))}
                 </div>
