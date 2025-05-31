@@ -1,5 +1,5 @@
-//SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0 <0.9.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 // Useful for debugging. Remove when deploying to a live network.
 import "forge-std/console.sol";
@@ -22,6 +22,36 @@ contract YourContract {
 
     // Events: a way to emit log statements from smart contract that can be listened to by external parties
     event GreetingChange(address indexed greetingSetter, string newGreeting, bool premium, uint256 value);
+
+    // --- Username Mapping ---
+    mapping(address => string) public telegramUsername;
+    event UsernameUpdated(address indexed user, string username);
+
+    // --- Review System ---
+    struct Review {
+        address reviewer;
+        uint8 rating; // 1-5
+        string description;
+        uint256 timestamp;
+    }
+    mapping(string => Review[]) private reviews;
+    event ReviewSubmitted(
+        string indexed username,
+        address indexed reviewer,
+        uint8 rating,
+        string description
+    );
+
+    // --- ERC20 TBT Token Implementation ---
+    string public constant name = "Trust Buddy Token";
+    string public constant symbol = "TBT";
+    uint8 public constant decimals = 18;
+    uint256 public totalSupply;
+
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 
     // Constructor: Called once on contract deployment
     // Check packages/foundry/deploy/Deploy.s.sol
@@ -76,4 +106,84 @@ contract YourContract {
      * Function that allows the contract to receive ETH
      */
     receive() external payable { }
+
+    // --- Username Functions ---
+    function submitUsername(string calldata _username) external {
+        require(bytes(_username).length > 0, "Username cannot be empty");
+        telegramUsername[msg.sender] = _username;
+        emit UsernameUpdated(msg.sender, _username);
+    }
+
+    // --- Review Functions ---
+    function submitReview(string calldata _username, uint8 _rating, string calldata _description) external {
+        require(bytes(_username).length > 0, "Username cannot be empty");
+        require(_rating >= 1 && _rating <= 5, "Rating must be 1-5");
+
+        Review memory newReview = Review({
+            reviewer: msg.sender,
+            rating: _rating,
+            description: _description,
+            timestamp: block.timestamp
+        });
+        reviews[_username].push(newReview);
+        emit ReviewSubmitted(_username, msg.sender, _rating, _description);
+
+        // Mint 1 TBT to reviewer
+        _mint(msg.sender, 1);
+    }
+
+    function getReviewCount(string calldata _username) external view returns (uint256) {
+        return reviews[_username].length;
+    }
+
+    function getReview(string calldata _username, uint256 index) external view returns (
+        address reviewer,
+        uint8 rating,
+        string memory description,
+        uint256 timestamp
+    ) {
+        require(index < reviews[_username].length, "Review index out of bounds");
+        Review storage r = reviews[_username][index];
+        return (r.reviewer, r.rating, r.description, r.timestamp);
+    }
+
+    function getAllReviews(string calldata _username) external view returns (Review[] memory) {
+        return reviews[_username];
+    }
+
+    // --- ERC20 Functions ---
+    function transfer(address _to, uint256 _value) external returns (bool) {
+        require(balanceOf[msg.sender] >= _value, "Insufficient balance");
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+
+    function approve(address _spender, uint256 _value) external returns (bool) {
+        allowance[msg.sender][_spender] = _value;
+        emit Approval(msg.sender, _spender, _value);
+        return true;
+    }
+
+    function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
+        require(balanceOf[_from] >= _value, "Insufficient balance");
+        require(allowance[_from][msg.sender] >= _value, "Allowance exceeded");
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+
+    // --- Internal ERC20 Helpers ---
+    function _transfer(address _from, address _to, uint256 _value) internal {
+        require(_to != address(0), "Transfer to zero address");
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        emit Transfer(_from, _to, _value);
+    }
+
+    function _mint(address _to, uint256 _value) internal {
+        require(_to != address(0), "Mint to zero address");
+        totalSupply += _value;
+        balanceOf[_to] += _value;
+        emit Transfer(address(0), _to, _value);
+    }
 }
