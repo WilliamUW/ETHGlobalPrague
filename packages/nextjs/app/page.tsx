@@ -222,7 +222,7 @@ const Home = () => {
               <div>
                 <label className="block text-sm font-medium mb-2">Your Review</label>
                 <textarea
-                  className="textarea textarea-bordered w-full h-32 text-base"
+                  className="textarea textarea-bordered rounded-lg w-full h-32 text-base"
                   placeholder="Share your experience with this profile. What makes them trustworthy or not? What was your interaction like?"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
