@@ -1,9 +1,8 @@
 "use client";
 
-import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { useEffect, useState } from "react";
+import { useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
-import { Address } from "~~/components/scaffold-eth";
 import { FaTwitter } from "react-icons/fa";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth/useDeployedContractInfo";
 
@@ -48,89 +47,6 @@ export const getTier = (balance: number): Tier => {
   return "BRONZE";
 };
 
-interface ReviewCardProps {
-  review: Review;
-  connectedAddress?: `0x${string}`;
-  contractAddress?: `0x${string}`;
-  contractAbi?: any;
-  onReport: (index: number) => void;
-  isReporting: boolean;
-}
-
-const ReviewCard = ({
-  review,
-  connectedAddress,
-  contractAddress,
-  contractAbi,
-  onReport,
-  isReporting,
-}: ReviewCardProps) => {
-  const { data: twitterUsername } = useReadContract({
-    address: contractAddress,
-    abi: contractAbi,
-    functionName: "platformUsernames",
-    args: [review.reviewer, 1], // 1 = Twitter
-    query: { enabled: !!contractAddress },
-  }) as { data: string | undefined };
-
-  const { data: reviewerBalance } = useReadContract({
-    address: contractAddress,
-    abi: contractAbi,
-    functionName: "balanceOf",
-    args: [review.reviewer],
-    query: { enabled: !!contractAddress },
-  });
-
-  const balance = reviewerBalance ? Number(reviewerBalance) / 1e18 : 0;
-  const tier = getTier(balance);
-
-  return (
-    <div className="bg-white rounded-2xl shadow p-6 mb-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Address address={review.reviewer} />
-          {review.reviewer === connectedAddress && (
-            <span className="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full font-medium">You</span>
-          )}
-          {twitterUsername && twitterUsername !== "" && (
-            <a
-              href={`https://x.com/${twitterUsername}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-[#1DA1F2] font-medium"
-            >
-              <FaTwitter className="w-4 h-4" />
-              @{twitterUsername}
-              <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-500" aria-label="Verified">
-                <path fill="currentColor" d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"/>
-              </svg>
-            </a>
-          )}
-          <span className={`flex items-center gap-1 text-sm font-medium ${TIER_COLORS[tier]}`}>
-            {TIER_ICONS[tier]} {tier}
-          </span>
-          <span className="text-sm text-gray-500">({balance.toFixed(1)} TBT)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-gray-700 text-base">
-            {review.rating.toFixed(1)}
-          </span>
-          <div className="flex gap-0.5">
-            {[1,2,3,4,5].map(i => (
-              <span key={i} className={i <= review.rating ? "text-yellow-500" : "text-gray-300"}>★</span>
-            ))}
-          </div>
-          <button className="ml-4 text-gray-500 hover:text-red-500 text-sm font-medium" onClick={() => onReport(0)} disabled={isReporting}>
-            {isReporting ? "Reported" : "Report"}
-          </button>
-        </div>
-      </div>
-      <div className="text-xs text-gray-400 mt-1">{new Date(Number(review.timestamp) * 1000).toLocaleString()}</div>
-      <div className="mt-2 text-base text-gray-800">{review.description}</div>
-    </div>
-  );
-};
-
 interface PlatformInfo {
   name: string;
   icon: string;
@@ -159,17 +75,65 @@ const PLATFORM_INFO: Record<number, PlatformInfo> = {
   },
 };
 
+// Inline badge for Twitter and tier
+const ReviewerBadge = ({
+  reviewer,
+  contractAddress,
+  contractAbi,
+}: {
+  reviewer: `0x${string}`;
+  contractAddress?: `0x${string}`;
+  contractAbi?: any;
+}) => {
+  const { data: twitterUsername } = useReadContract({
+    address: contractAddress,
+    abi: contractAbi,
+    functionName: "platformUsernames",
+    args: [reviewer, 1], // 1 = Twitter
+    query: { enabled: !!contractAddress },
+  }) as { data: string | undefined };
+
+  const { data: reviewerBalance } = useReadContract({
+    address: contractAddress,
+    abi: contractAbi,
+    functionName: "balanceOf",
+    args: [reviewer],
+    query: { enabled: !!contractAddress },
+  });
+  const balance = reviewerBalance ? Number(reviewerBalance) / 1e18 : 0;
+  const tier = getTier(balance);
+
+  return (
+    <>
+      {twitterUsername && twitterUsername !== "" && (
+        <a
+          href={`https://x.com/${twitterUsername}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-[#1DA1F2] font-medium"
+        >
+          <FaTwitter className="w-4 h-4" />
+          @{twitterUsername}
+          <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-500" aria-label="Verified">
+            <path fill="currentColor" d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"/>
+          </svg>
+        </a>
+      )}
+      <span className={`flex items-center gap-1 text-sm font-medium ${TIER_COLORS[tier]}`}>{TIER_ICONS[tier]} {tier}</span>
+      <span className="text-sm text-gray-500">({balance.toFixed(1)} TBT)</span>
+    </>
+  );
+};
+
 const Home = () => {
-  const { address: connectedAddress } = useAccount();
-  const [platform, setPlatform] = useState(1);
-  const [username, setUsername] = useState("HeyWilliamWang");
   const [rating, setRating] = useState(5);
   const [description, setDescription] = useState("");
   const [isSubmitExpanded, setIsSubmitExpanded] = useState(false);
-  const [linkInput, setLinkInput] = useState("https://x.com/HeyWilliamWang");
-  const [reportingReview, setReportingReview] = useState<number | null>(null);
   const [lastTxHash, setLastTxHash] = useState<`0x${string}` | null>(null);
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const [platform, setPlatform] = useState(1);
+  const [username, setUsername] = useState("HeyWilliamWang");
+  const [linkInput, setLinkInput] = useState("https://x.com/HeyWilliamWang");
 
   const { data: deployedContractData } = useDeployedContractInfo("YourContract");
 
@@ -222,56 +186,81 @@ const Home = () => {
         functionName: "submitReview",
         args: [platform, username, rating, description],
       });
-    } catch (error) {
-      console.error("Error submitting review:", error);
-      setSubmissionStatus("idle");
-    }
-  };
-
-  const handleLinkInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLinkInput(value);
-
-    // Try to extract platform and username from the link
-    try {
-      // Add https:// prefix if not present
-      const urlString = value.startsWith("http") ? value : `https://${value}`;
-      const url = new URL(urlString);
-      const path = url.pathname;
-
-      // Telegram
-      if (url.hostname.includes("t.me")) {
-        setPlatform(0);
-        setUsername(path.slice(1).replace(/^@+/, "")); // Remove leading slash and @
-        return;
-      }
-
-      // Twitter/X
-      if (url.hostname.includes("x.com") || url.hostname.includes("twitter.com")) {
-        setPlatform(1);
-        setUsername(path.slice(1).replace(/^@+/, "")); // Remove leading slash and @
-        return;
-      }
-
-      // LinkedIn
-      if (url.hostname.includes("linkedin.com")) {
-        setPlatform(2);
-        setUsername((path.split("/in/")[1]?.split("/")[0] || "").replace(/^@+/, "")); // Extract username and remove @
-        return;
-      }
-    } catch (error) {
-      console.error("Invalid URL:", error);
+    } catch {
+      // ignore
     }
   };
 
   const averageRating =
     reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0;
 
+  // Star breakdown for left column
+  const starCounts = [5, 4, 3, 2, 1].map(star => reviews.filter(r => r.rating === star).length);
+  const starPercents = starCounts.map(count => (reviews.length ? (count / reviews.length) * 100 : 0));
+
+  // Handler for link input
+  const handleLinkInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLinkInput(value);
+    try {
+      const urlString = value.startsWith("http") ? value : `https://${value}`;
+      const url = new URL(urlString);
+      const path = url.pathname;
+      if (url.hostname.includes("t.me")) {
+        setPlatform(0);
+        setUsername(path.slice(1).replace(/^@+/, ""));
+        return;
+      }
+      if (url.hostname.includes("x.com") || url.hostname.includes("twitter.com")) {
+        setPlatform(1);
+        setUsername(path.slice(1).replace(/^@+/, ""));
+        return;
+      }
+      if (url.hostname.includes("linkedin.com")) {
+        setPlatform(2);
+        setUsername((path.split("/in/")[1]?.split("/")[0] || "").replace(/^@+/, ""));
+        return;
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   return (
-    <div className="flex items-center flex-col grow pt-10">
-      <div className="px-5 w-full max-w-2xl">
-        {/* Platform and Username Selection */}
-        <div className="bg-base-100 p-8 rounded-3xl shadow-lg mb-8">
+    <div className="flex flex-col md:flex-row gap-8 w-full max-w-5xl mx-auto pt-10">
+      {/* Left: Summary/Filters */}
+      <div className="w-full md:w-1/3">
+        <div className="bg-white rounded-2xl shadow p-6 mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-green-600 text-2xl font-bold">{averageRating.toFixed(1)}</span>
+            <span className="flex text-green-600 text-xl">
+              {Array(Math.round(averageRating)).fill(0).map((_, i) => <span key={i}>★</span>)}
+            </span>
+          </div>
+          <div className="text-gray-700 font-semibold mb-4">All reviews</div>
+          <div className="text-gray-500 mb-4">{reviews.length} total • <a href="#" className="text-blue-600 underline">Write a review</a></div>
+          {/* Star breakdown */}
+          <div className="space-y-2 mb-6">
+            {[5,4,3,2,1].map((star, idx) => (
+              <div key={star} className="flex items-center gap-2">
+                <span className="w-8 text-sm">{star}-star</span>
+                <div className="flex-1 bg-gray-200 rounded h-2">
+                  <div className="bg-gray-500 h-2 rounded" style={{ width: `${starPercents[idx]}%` }} />
+                </div>
+                <span className="w-8 text-sm text-right">{starCounts[idx]}</span>
+              </div>
+            ))}
+          </div>
+          {/* (Optional) Filters/Search */}
+          <input className="input input-bordered w-full mb-2" placeholder="Search by keyword..." />
+          <button className="btn btn-sm w-full mb-2">More filters</button>
+          <button className="btn btn-sm w-full">Most recent ▼</button>
+        </div>
+      </div>
+      {/* Right: Review Form + Reviews List */}
+      <div className="w-full md:w-2/3">
+        {/* Platform/Username/Link Input */}
+        <div className="bg-white rounded-2xl shadow p-8 mb-8">
           <div className="space-y-6">
             {/* Link Input */}
             <div>
@@ -284,7 +273,6 @@ const Home = () => {
                 onChange={handleLinkInput}
               />
             </div>
-
             {/* Platform Selection */}
             <div>
               <label className="block text-sm font-medium mb-2">Platform</label>
@@ -308,7 +296,7 @@ const Home = () => {
                 ))}
               </div>
             </div>
-
+            {/* Username Input */}
             <div>
               <label className="block text-sm font-medium mb-2">Username</label>
               <div className="relative">
@@ -324,9 +312,8 @@ const Home = () => {
             </div>
           </div>
         </div>
-
-        {/* Submit Review Form */}
-        <div className="bg-base-100 p-8 rounded-3xl shadow-lg mb-8">
+        {/* Review Submission Form */}
+        <div className="bg-white rounded-2xl shadow p-8 mb-8">
           <button
             className="w-full flex justify-between items-center text-2xl font-bold mb-6 hover:opacity-80 transition-opacity"
             onClick={() => setIsSubmitExpanded(!isSubmitExpanded)}
@@ -444,48 +431,44 @@ const Home = () => {
             </form>
           )}
         </div>
-
-        {/* Reviews Header */}
-        <div className="bg-white rounded-2xl shadow p-8 mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-2xl font-bold">Reviews</h2>
-            {username && (
-              <span className="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium">
-                <FaTwitter className="w-4 h-4" />
-                {username}
-              </span>
-            )}
-            {reviews.length > 0 && (
-              <>
-                <span className="flex items-center gap-1 ml-4 text-yellow-500 text-xl">
-                  {Array(Math.round(averageRating)).fill(0).map((_, i) => <span key={i}>★</span>)}
-                </span>
-                <span className="font-bold text-lg text-gray-700">({averageRating.toFixed(1)})</span>
-                <span className="text-gray-500 text-base ml-2">{reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</span>
-              </>
-            )}
-          </div>
-
-          {/* Reviews Display */}
-          <div>
-            {reviews && reviews.length > 0 ? (
-              reviews.map((review, index) => (
-                <ReviewCard
-                  key={index}
-                  review={review}
-                  connectedAddress={connectedAddress as `0x${string}`}
-                  contractAddress={deployedContractData?.address as `0x${string}`}
-                  contractAbi={deployedContractData?.abi}
-                  onReport={setReportingReview}
-                  isReporting={reportingReview === index}
-                />
-              ))
-            ) : (
-              <div className="text-center text-gray-400 py-8">
-                {username ? "No reviews found" : "Enter a username to view reviews"}
+        {/* Reviews List */}
+        <div>
+          {reviews && reviews.length > 0 ? (
+            reviews.map((review, index) => (
+              <div key={index} className="bg-white rounded-2xl shadow p-6 mb-6">
+                <div className="flex items-center gap-3 mb-2">
+                  {/* Avatar (use blockie or placeholder) */}
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg font-bold">
+                    {review.reviewer.slice(2, 4).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold">{review.reviewer.slice(0, 6)}...{review.reviewer.slice(-4)}</span>
+                      <ReviewerBadge
+                        reviewer={review.reviewer as `0x${string}`}
+                        contractAddress={deployedContractData?.address as `0x${string}`}
+                        contractAbi={deployedContractData?.abi}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="flex text-yellow-500 text-lg">
+                        {[1,2,3,4,5].map(i => (
+                          <span key={i}>{i <= review.rating ? "★" : "☆"}</span>
+                        ))}
+                      </span>
+                      <span className="text-gray-500 text-sm">{review.rating}.0</span>
+                      <span className="text-xs text-gray-400 ml-2">{new Date(Number(review.timestamp) * 1000).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 text-base text-gray-800 whitespace-pre-line">{review.description}</div>
               </div>
-            )}
-          </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-400 py-8">
+              {username ? "No reviews found" : "Enter a username to view reviews"}
+            </div>
+          )}
         </div>
       </div>
     </div>
