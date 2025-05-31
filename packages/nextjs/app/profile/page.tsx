@@ -64,6 +64,40 @@ const Profile = () => {
             </div>
           )}
 
+          {/* Coming Soon: Telegram Verification */}
+          <div className="mb-6">
+            <div className="text-sm font-medium text-base-content/70 mb-2">Telegram Verification</div>
+            <div className="flex items-center gap-3 p-4 bg-base-200 rounded-xl opacity-60">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
+                alt="Telegram"
+                className="w-8 h-8"
+              />
+              <div className="flex-1">
+                <div className="font-medium">Telegram Handle</div>
+                <div className="text-sm text-base-content/70">Coming Soon</div>
+              </div>
+              <div className="text-xs bg-base-300 text-base-content/70 px-2 py-1 rounded-full">Soon</div>
+            </div>
+          </div>
+
+          {/* Coming Soon: LinkedIn Verification */}
+          <div className="mb-6">
+            <div className="text-sm font-medium text-base-content/70 mb-2">LinkedIn Verification</div>
+            <div className="flex items-center gap-3 p-4 bg-base-200 rounded-xl opacity-60">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
+                alt="LinkedIn"
+                className="w-8 h-8"
+              />
+              <div className="flex-1">
+                <div className="font-medium">LinkedIn Profile</div>
+                <div className="text-sm text-base-content/70">Coming Soon</div>
+              </div>
+              <div className="text-xs bg-base-300 text-base-content/70 px-2 py-1 rounded-full">Soon</div>
+            </div>
+          </div>
+
           {/* Token Balance and Current Tier */}
           <div className="mb-8">
             <div className="text-sm font-medium text-base-content/70 mb-2">Token Balance</div>
