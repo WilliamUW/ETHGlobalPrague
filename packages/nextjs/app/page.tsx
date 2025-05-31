@@ -4,6 +4,7 @@ import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteCont
 import { useEffect, useState } from "react";
 
 import { Address } from "~~/components/scaffold-eth";
+import { FaTwitter } from "react-icons/fa";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth/useDeployedContractInfo";
 
 interface Review {
@@ -64,59 +65,68 @@ const ReviewCard = ({
   onReport,
   isReporting,
 }: ReviewCardProps) => {
+  const { data: twitterUsername } = useReadContract({
+    address: contractAddress,
+    abi: contractAbi,
+    functionName: "platformUsernames",
+    args: [review.reviewer, 1], // 1 = Twitter
+    query: { enabled: !!contractAddress },
+  }) as { data: string | undefined };
+
   const { data: reviewerBalance } = useReadContract({
     address: contractAddress,
     abi: contractAbi,
     functionName: "balanceOf",
     args: [review.reviewer],
-    query: {
-      enabled: !!contractAddress,
-    },
+    query: { enabled: !!contractAddress },
   });
 
   const balance = reviewerBalance ? Number(reviewerBalance) / 1e18 : 0;
   const tier = getTier(balance);
 
-  const renderStars = (rating: number, size: "sm" | "md" = "md") => {
-    const stars = [];
-    const sizeClass = size === "sm" ? "text-sm" : "text-lg";
-
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} className={`${i <= rating ? "text-yellow-500" : "text-gray-300"} ${sizeClass}`}>
-          ★
-        </span>,
-      );
-    }
-    return <div className="flex gap-0.5">{stars}</div>;
-  };
-
   return (
-    <div className="bg-base-200 p-6 rounded-xl hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start mb-3">
-        <div className="space-y-1">
-          <div className="font-medium flex items-center gap-2">
-            <Address address={review.reviewer} />
-            {review.reviewer === connectedAddress && (
-              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
-            )}
-            <span className={`text-sm ${TIER_COLORS[tier]} flex items-center gap-1`}>
-              {TIER_ICONS[tier]} {tier}
-            </span>
-            <span className="text-sm text-base-content/70">({balance.toFixed(1)} TBT)</span>
-          </div>
-          <div className="text-sm text-base-content/70">
-            {new Date(Number(review.timestamp) * 1000).toLocaleString()}
-          </div>
-        </div>
+    <div className="bg-white rounded-2xl shadow p-6 mb-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {renderStars(review.rating, "sm")}
-          <button className="btn btn-ghost btn-sm" onClick={() => onReport(0)} disabled={isReporting}>
+          <Address address={review.reviewer} />
+          {review.reviewer === connectedAddress && (
+            <span className="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full font-medium">You</span>
+          )}
+          {twitterUsername && twitterUsername !== "" && (
+            <a
+              href={`https://x.com/${twitterUsername}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-[#1DA1F2] font-medium"
+            >
+              <FaTwitter className="w-4 h-4" />
+              @{twitterUsername}
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-500" aria-label="Verified">
+                <path fill="currentColor" d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"/>
+              </svg>
+            </a>
+          )}
+          <span className={`flex items-center gap-1 text-sm font-medium ${TIER_COLORS[tier]}`}>
+            {TIER_ICONS[tier]} {tier}
+          </span>
+          <span className="text-sm text-gray-500">({balance.toFixed(1)} TBT)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-gray-700 text-base">
+            {review.rating.toFixed(1)}
+          </span>
+          <div className="flex gap-0.5">
+            {[1,2,3,4,5].map(i => (
+              <span key={i} className={i <= review.rating ? "text-yellow-500" : "text-gray-300"}>★</span>
+            ))}
+          </div>
+          <button className="ml-4 text-gray-500 hover:text-red-500 text-sm font-medium" onClick={() => onReport(0)} disabled={isReporting}>
             {isReporting ? "Reported" : "Report"}
           </button>
         </div>
       </div>
-      <div className="text-base-content/90 leading-relaxed">{review.description}</div>
+      <div className="text-xs text-gray-400 mt-1">{new Date(Number(review.timestamp) * 1000).toLocaleString()}</div>
+      <div className="mt-2 text-base text-gray-800">{review.description}</div>
     </div>
   );
 };
@@ -254,28 +264,8 @@ const Home = () => {
     }
   };
 
-  const handleReport = (reviewIndex: number) => {
-    setReportingReview(reviewIndex);
-    // TODO: Implement report functionality
-    setTimeout(() => setReportingReview(null), 2000);
-  };
-
   const averageRating =
     reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0;
-
-  const renderStars = (rating: number, size: "sm" | "md" = "md") => {
-    const stars = [];
-    const sizeClass = size === "sm" ? "text-sm" : "text-lg";
-
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} className={`${i <= rating ? "text-yellow-500" : "text-gray-300"} ${sizeClass}`}>
-          ★
-        </span>,
-      );
-    }
-    return <div className="flex gap-0.5">{stars}</div>;
-  };
 
   return (
     <div className="flex items-center flex-col grow pt-10">
@@ -455,33 +445,29 @@ const Home = () => {
           )}
         </div>
 
-        {/* View Reviews Section */}
-        <div className="bg-base-100 p-8 rounded-3xl shadow-lg">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold">Reviews</h2>
-              {username && (
-                <div className="flex items-center gap-2 px-3 py-1 bg-base-200 rounded-full">
-                  <img src={PLATFORM_INFO[platform].logo} alt={PLATFORM_INFO[platform].name} className="w-4 h-4" />
-                  <span className="text-sm">{username}</span>
-                </div>
-              )}
-            </div>
+        {/* Reviews Header */}
+        <div className="bg-white rounded-2xl shadow p-8 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-2xl font-bold">Reviews</h2>
+            {username && (
+              <span className="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium">
+                <FaTwitter className="w-4 h-4" />
+                {username}
+              </span>
+            )}
             {reviews.length > 0 && (
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  {renderStars(Math.round(averageRating))}
-                  <span className="text-lg font-medium">({averageRating.toFixed(1)})</span>
-                </div>
-                <div className="text-base-content/70">
-                  {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
-                </div>
-              </div>
+              <>
+                <span className="flex items-center gap-1 ml-4 text-yellow-500 text-xl">
+                  {Array(Math.round(averageRating)).fill(0).map((_, i) => <span key={i}>★</span>)}
+                </span>
+                <span className="font-bold text-lg text-gray-700">({averageRating.toFixed(1)})</span>
+                <span className="text-gray-500 text-base ml-2">{reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</span>
+              </>
             )}
           </div>
 
           {/* Reviews Display */}
-          <div className="space-y-4">
+          <div>
             {reviews && reviews.length > 0 ? (
               reviews.map((review, index) => (
                 <ReviewCard
@@ -490,12 +476,12 @@ const Home = () => {
                   connectedAddress={connectedAddress as `0x${string}`}
                   contractAddress={deployedContractData?.address as `0x${string}`}
                   contractAbi={deployedContractData?.abi}
-                  onReport={handleReport}
+                  onReport={setReportingReview}
                   isReporting={reportingReview === index}
                 />
               ))
             ) : (
-              <div className="text-center text-base-content/70 py-8">
+              <div className="text-center text-gray-400 py-8">
                 {username ? "No reviews found" : "Enter a username to view reviews"}
               </div>
             )}
